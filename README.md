@@ -1,437 +1,280 @@
-# BoxMOT: pluggable SOTA tracking modules for segmentation, object detection and pose estimation models
+![](assets/logo.png)
 
-<div align="center">
-  <p>
-  <img src="assets/images/track_all_seg_1280_025conf.gif" width="400"/>
-  </p>
-  <br>
-  <div>
-  <a href="https://github.com/mikel-brostrom/yolov8_tracking/actions/workflows/ci.yml"><img src="https://github.com/mikel-brostrom/yolov8_tracking/actions/workflows/ci.yml/badge.svg" alt="CI CPU testing"></a>
-  <a href="https://pepy.tech/project/boxmot"><img src="https://static.pepy.tech/badge/boxmot"></a>
-  <br>
-  <a href="https://colab.research.google.com/drive/18nIqkBr68TkK8dHdarxTco6svHUJGggY?usp=sharing"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
-<a href="https://doi.org/10.5281/zenodo.8132989"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.8132989.svg" alt="DOI"></a>
-<a href="https://hub.docker.com/r/boxmot/boxmot"><img src="https://img.shields.io/docker/pulls/boxmot/boxmot?logo=docker" alt="Ultralytics Docker Pulls"></a>
+# Fast Segment Anything
 
-  </div>
-</div>
+[[`📕Paper`](https://arxiv.org/pdf/2306.12156.pdf)] [[`🤗HuggingFace Demo`](https://huggingface.co/spaces/An-619/FastSAM)] [[`Colab demo`](https://colab.research.google.com/drive/1oX14f6IneGGw612WgVlAiy91UHwFAvr9?usp=sharing)] [[`Replicate demo & API`](https://replicate.com/casia-iva-lab/fastsam)] [~~[`OpenXLab Demo`](https://openxlab.org.cn/apps/detail/zxair/FastSAM)~~] [[`Model Zoo`](#model-checkpoints)] [[`BibTeX`](#citing-fastsam)] [[`Video Demo`](https://youtu.be/yHNPyqazYYU)]
 
-## Introduction
+![FastSAM Speed](assets/head_fig.png)
 
-This repo contains a collections of pluggable state-of-the-art multi-object trackers for segmentation, object detection and pose estimation models. For the methods using appearance description, both heavy ([CLIPReID](https://arxiv.org/pdf/2211.13977.pdf)) and lightweight state-of-the-art ReID models ([LightMBN](https://arxiv.org/pdf/2101.10774.pdf), [OSNet](https://arxiv.org/pdf/1905.00953.pdf) and more) are available for automatic download. We provide examples on how to use this package together with popular object detection models such as: [Yolov8](https://github.com/ultralytics), [Yolo-NAS](https://github.com/Deci-AI/super-gradients) and [YOLOX](https://github.com/Megvii-BaseDetection/YOLOX).
+The **Fast Segment Anything Model(FastSAM)** is a CNN Segment Anything Model trained using only 2% of the SA-1B dataset published by SAM authors. FastSAM achieves comparable performance with
+the SAM method at **50× higher run-time speed**.
 
-<div align="center">
+![FastSAM design](assets/Overview.png)
 
-|  Tracker | HOTA↑ | MOTA↑ | IDF1↑ |
-| -------- | ----- | ----- | ----- |
-| [BoTSORT](https://arxiv.org/pdf/2206.14651.pdf)    | 77.8 | 78.9 | 88.9 |
-| [DeepOCSORT](https://arxiv.org/pdf/2302.11813.pdf) | 77.4 | 78.4 | 89.0 |
-| [OCSORT](https://arxiv.org/pdf/2203.14360.pdf)     | 77.4 | 78.4 | 89.0 |
-| [HybridSORT](https://arxiv.org/pdf/2308.00783.pdf) | 77.3 | 77.9 | 88.8 |
-| [ByteTrack](https://arxiv.org/pdf/2110.06864.pdf)  | 75.6 | 74.6 | 86.0 |
-| [StrongSORT](https://arxiv.org/pdf/2202.13514.pdf) |      | | |
-| <img width=200/>                                   | <img width=100/> | <img width=100/> | <img width=100/> |
-
-<sub> NOTES: performed on the 10 first frames of each MOT17 sequence. The detector used is ByteTrack's YoloXm, trained on: CrowdHuman, MOT17, Cityperson and ETHZ. Each tracker is configured with its original parameters found in their respective official repository.</sub>
-
-</div>
-
-</details>
-
-<details>
-<summary>3rd party resources</summary>
-
-* [ROS wrapper for boxmot (link to external repository)](https://github.com/KalanaRatnayake/boxmot_ros)&nbsp;
-* [Yolov10 Integration with BoxMOT (link to external Notebook)](https://colab.research.google.com/drive/1-QV2TNfqaMsh14w5VxieEyanugVBG14V?usp=drive_link)&nbsp;
-* [Yolov8 training (link to external repository)](https://docs.ultralytics.com/modes/train/)&nbsp;
-* [ReID model training (link to external repository)](https://kaiyangzhou.github.io/deep-person-reid/user_guide.html)&nbsp;
-* [ReID model inference acceleration with Nebullvm (link to external Notebook)](https://colab.research.google.com/drive/1APUZ1ijCiQFBR9xD0gUvFUOC8yOJIvHm?usp=sharing)&nbsp;
-
-  </details>
-
-<details>
-<summary>Experiments</summary>
-
-In inverse chronological order:
-
-* [Evaluation of the params evolved for first half of MOT17 on the complete MOT17](https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet/wiki/Evaluation-of-the-params-evolved-for-first-half-of-MOT17-on-the-complete-MOT17)
-
-* [Segmentation model vs object detetion model on MOT metrics](https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet/wiki/Segmentation-model-vs-object-detetion-model-on-MOT-metrics)
-
-* [Effect of masking objects before feature extraction](https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet/wiki/Masked-detection-crops-vs-regular-detection-crops-for-ReID-feature-extraction)
-
-* [conf-thres vs HOTA, MOTA and IDF1](https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet/wiki/conf-thres-vs-MOT-metrics)
-
-* [Effect of KF updates ahead for tracks with no associations on MOT17](https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet/wiki/Effect-of-KF-updates-ahead-for-tracks-with-no-associations,-on-MOT17)
-
-* [Effect of full images vs 1280 input to StrongSORT on MOT17](https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet/wiki/Effect-of-passing-full-image-input-vs-1280-re-scaled-to-StrongSORT-on-MOT17)
-
-* [Effect of different OSNet architectures on MOT16](https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet/wiki/OSNet-architecture-performances-on-MOT16)
-
-* [Yolov5 StrongSORT vs BoTSORT vs OCSORT](https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet/wiki/StrongSORT-vs-BoTSORT-vs-OCSORT)
-    * Yolov5 [BoTSORT](https://arxiv.org/abs/2206.14651) branch: https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet/tree/botsort
-
-* [Yolov5 StrongSORT OSNet vs other trackers MOT17](https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet/wiki/MOT-17-evaluation-(private-detector))&nbsp;
-
-* [StrongSORT MOT16 ablation study](https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet/wiki/Yolov5DeepSORTwithOSNet-vs-Yolov5StrongSORTwithOSNet-ablation-study-on-MOT16)&nbsp;
-
-* [Yolov5 StrongSORT OSNet vs other trackers MOT16 (deprecated)](https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet/wiki/MOT-16-evaluation)&nbsp;
-
-  </details>
-
-#### News
-
-* Enabled tracking per class for all trackers besides StrongSORT by `--per-class` (March 2024)
-* Enabled trajectory plotting for all trackers besides StrongSORT by `--show-trajectories` (March 2024)
-* All trackers inherit from BaseTracker (March 2024)
-* Switched from setuptools to poetry for unified: dependency resolution, packaging and publishing management (March 2024)
-* ~x3 pipeline speedup by: using pregenerated detections + embeddings and jobs parallelization (March 2024)
-* Ultra fast exerimentation enabled by allowing local detections and embeddings saving. This data can then be loaded into any tracking algorithm, avoiding the overhead of repeatedly generating it (February 2024)
-* Centroid-based cost function added to OCSORT and DeepOCSORT (suitable for: small and/or high speed objects and low FPS videos) (January 2024)
-* Custom Ultralytics package updated from 8.0.124 to 8.0.224 (December 2023)
-* HybridSORT available (August 2023)
-* SOTA CLIP-ReID people and vehicle models available (August 2023)
-
-
-## Why BOXMOT?
-
-Today's multi-object tracking options are heavily dependant on the computation capabilities of the underlaying hardware. BoxMOT provides a great variety of tracking methods that meet different hardware limitations, all the way from CPU only to larger GPUs. Morover, we provide scripts for ultra fast experimentation by saving detections and embeddings, which then be loaded into any tracking algorithm. Avoiding the overhead of repeatedly generating this data.
+**🍇 Updates**
+- **`2024/6/25`** The edge jaggies issue has been slightly improved [#231](https://github.com/CASIA-IVA-Lab/FastSAM/pull/231), and the strategy has also been synchronized to the ultralytics project[#13939](https://github.com/ultralytics/ultralytics/pull/13939),[#13912](https://github.com/ultralytics/ultralytics/pull/13912). The [huggingface demo](https://huggingface.co/spaces/An-619/FastSAM) is updated.
+- **`2023/11/28`** Recommendation: [Semantic FastSAM](https://github.com/KBH00/Semantic-Fast-SAM), which add the semantic class labels to FastSAM. Thanks to [KBH00](https://github.com/KBH00/Semantic-Fast-SAM) for this valuable contribution.
+- **`2023/09/11`** Release  [Training and Validation Code](https://github.com/CASIA-IVA-Lab/FastSAM/releases).
+- **`2023/08/17`** Release  [OpenXLab Demo](https://openxlab.org.cn/apps/detail/zxair/FastSAM). Thanks to OpenXLab Team for help.
+- **`2023/07/06`** Added to [Ultralytics (YOLOv8) Model Hub](https://docs.ultralytics.com/models/fast-sam/). Thanks to [Ultralytics](https://github.com/ultralytics/ultralytics) for help 🌹.
+- **`2023/06/29`** Support [text mode](https://huggingface.co/spaces/An-619/FastSAM) in HuggingFace Space. Thanks a lot to [gaoxinge](https://github.com/gaoxinge) for help 🌹.
+- **`2023/06/29`** Release [FastSAM_Awesome_TensorRT](https://github.com/ChuRuaNh0/FastSam_Awsome_TensorRT). Thanks a lot to [ChuRuaNh0](https://github.com/ChuRuaNh0) for providing the TensorRT model of FastSAM 🌹.
+- **`2023/06/26`** Release [FastSAM Replicate Online Demo](https://replicate.com/casia-iva-lab/fastsam). Thanks a lot to [Chenxi](https://chenxwh.github.io/) for providing this nice demo 🌹.
+- **`2023/06/26`** Support [points mode](https://huggingface.co/spaces/An-619/FastSAM) in HuggingFace Space. Better and faster interaction will come soon!
+- **`2023/06/24`** Thanks a lot to [Grounding-SAM](https://github.com/IDEA-Research/Grounded-Segment-Anything) for Combining Grounding-DINO with FastSAM in [Grounded-FastSAM](https://github.com/IDEA-Research/Grounded-Segment-Anything/tree/main/EfficientSAM) 🌹.
 
 ## Installation
 
-Start with [**Python>=3.8**](https://www.python.org/) environment.
+Clone the repository locally:
 
-If you want to run the YOLOv8, YOLO-NAS or YOLOX examples:
-
-```
-git clone https://github.com/mikel-brostrom/boxmot.git
-cd boxmot
-pip install poetry
-poetry install --with yolo  # installed boxmot + yolo dependencies
-poetry shell  # activates the newly created environment with the installed dependencies
+```shell
+git clone https://github.com/CASIA-IVA-Lab/FastSAM.git
 ```
 
-but if you only want to import the tracking modules you can simply:
+Create the conda env. The code requires `python>=3.7`, as well as `pytorch>=1.7` and `torchvision>=0.8`. Please follow the instructions [here](https://pytorch.org/get-started/locally/) to install both PyTorch and TorchVision dependencies. Installing both PyTorch and TorchVision with CUDA support is strongly recommended.
 
-```
-pip install boxmot
-```
-
-## YOLOv8 | YOLO-NAS | YOLOX examples
-
-<details>
-<summary>Tracking</summary>
-
-<details>
-<summary>Yolo models</summary>
-
-
-
-```bash
-$ python tracking/track.py --yolo-model yolov8n       # bboxes only
-  python tracking/track.py --yolo-model yolo_nas_s    # bboxes only
-  python tracking/track.py --yolo-model yolox_n       # bboxes only
-                                        yolov8n-seg   # bboxes + segmentation masks
-                                        yolov8n-pose  # bboxes + pose estimation
-
+```shell
+conda create -n FastSAM python=3.9
+conda activate FastSAM
 ```
 
-  </details>
+Install the packages:
 
-<details>
-<summary>Tracking methods</summary>
-
-```bash
-$ python tracking/track.py --tracking-method deepocsort
-                                             strongsort
-                                             ocsort
-                                             bytetrack
-                                             botsort
+```shell
+cd FastSAM
+pip install -r requirements.txt
 ```
 
-</details>
+Install CLIP(Required if the text prompt is being tested.):
 
-<details>
-<summary>Tracking sources</summary>
-
-Tracking can be run on most video formats
-
-```bash
-$ python tracking/track.py --source 0                               # webcam
-                                    img.jpg                         # image
-                                    vid.mp4                         # video
-                                    path/                           # directory
-                                    path/*.jpg                      # glob
-                                    'https://youtu.be/Zgi9g1ksQHc'  # YouTube
-                                    'rtsp://example.com/media.mp4'  # RTSP, RTMP, HTTP stream
+```shell
+pip install git+https://github.com/openai/CLIP.git
 ```
 
-</details>
+## <a name="GettingStarted"></a> Getting Started
 
-<details>
-<summary>Select ReID model</summary>
 
-Some tracking methods combine appearance description and motion in the process of tracking. For those which use appearance, you can choose a ReID model based on your needs from this [ReID model zoo](https://kaiyangzhou.github.io/deep-person-reid/MODEL_ZOO). These model can be further optimized for you needs by the [reid_export.py](https://github.com/mikel-brostrom/yolo_tracking/blob/master/boxmot/appearance/reid_export.py) script
+First download a [model checkpoint](#model-checkpoints).
 
-```bash
-$ python tracking/track.py --source 0 --reid-model lmbn_n_cuhk03_d.pt               # lightweight
-                                                   osnet_x0_25_market1501.pt
-                                                   mobilenetv2_x1_4_msmt17.engine
-                                                   resnet50_msmt17.onnx
-                                                   osnet_x1_0_msmt17.pt
-                                                   clip_market1501.pt               # heavy
-                                                   clip_vehicleid.pt
-                                                   ...
+Then, you can run the scripts to try the everything mode and three prompt modes.
+
+```shell
+# Everything mode
+python Inference.py --model_path ./weights/FastSAM.pt --img_path ./images/dogs.jpg
 ```
 
-</details>
-
-<details>
-<summary>Filter tracked classes</summary>
-
-By default the tracker tracks all MS COCO classes.
-
-If you want to track a subset of the classes that you model predicts, add their corresponding index after the classes flag,
-
-```bash
-python tracking/track.py --source 0 --yolo-model yolov8s.pt --classes 16 17  # COCO yolov8 model. Track cats and dogs, only
+```shell
+# Text prompt
+python Inference.py --model_path ./weights/FastSAM.pt --img_path ./images/dogs.jpg  --text_prompt "the yellow dog"
 ```
 
-[Here](https://tech.amikelive.com/node-718/what-object-categories-labels-are-in-coco-dataset/) is a list of all the possible objects that a Yolov8 model trained on MS COCO can detect. Notice that the indexing for the classes in this repo starts at zero
-
-</details>
-
-
-</details>
-
-<details>
-<summary>Evaluation</summary>
-
-Evaluate a combination of detector, tracking method and ReID model on standard MOT dataset or you custom one by
-
-```bash
-# saves dets and embs under ./runs/dets_n_embs separately for each selected yolo and reid model
-$ python tracking/generate_dets_n_embs.py --source ./assets/MOT17-mini/train --yolo-model yolov8n.pt yolov8s.pt --reid-model weights/osnet_x0_25_msmt17.pt
-# generate MOT challenge format results based on pregenerated detections and embeddings for a specific trackign method
-$ python tracking/generate_mot_results.py --dets yolov8n --embs osnet_x0_25_msmt17 --tracking-method botsort
-# uses TrackEval to generate MOT metrics for the tracking results under ./runs/mot/<dets+embs+tracking-method>
-$ python tracking/val.py --benchmark MOT17-mini --dets yolov8n --embs osnet_x0_25_msmt17 --tracking-method botsort
+```shell
+# Box prompt (xywh)
+python Inference.py --model_path ./weights/FastSAM.pt --img_path ./images/dogs.jpg --box_prompt "[[570,200,230,400]]"
 ```
 
-</details>
-
-
-<details>
-<summary>Evolution</summary>
-
-We use a fast and elitist multiobjective genetic algorithm for tracker hyperparameter tuning. By default the objectives are: HOTA, MOTA, IDF1. Run it by
-
-```bash
-# saves dets and embs under ./runs/dets_n_embs separately for each selected yolo and reid model
-$ python tracking/generate_dets_n_embs.py --source ./assets/MOT17-mini/train --yolo-model yolov8n.pt yolov8s.pt --reid-model weights/osnet_x0_25_msmt17.pt
-# evolve parameters for specified tracking method using the selected detections and embeddings generated in the previous step
-$ python tracking/evolve.py --benchmark MOT17-mini --dets yolov8n --embs osnet_x0_25_msmt17 --n-trials 9 --tracking-method botsort
+```shell
+# Points prompt
+python Inference.py --model_path ./weights/FastSAM.pt --img_path ./images/dogs.jpg  --point_prompt "[[520,360],[620,300]]" --point_label "[1,0]"
 ```
 
-The set of hyperparameters leading to the best HOTA result are written to the tracker's config file.
+You can use the following code to generate all masks and visualize the results.
+```shell
+from fastsam import FastSAM, FastSAMPrompt
 
-</details>
+model = FastSAM('./weights/FastSAM.pt')
+IMAGE_PATH = './images/dogs.jpg'
+DEVICE = 'cpu'
+everything_results = model(IMAGE_PATH, device=DEVICE, retina_masks=True, imgsz=1024, conf=0.4, iou=0.9,)
+prompt_process = FastSAMPrompt(IMAGE_PATH, everything_results, device=DEVICE)
 
-<details>
-<summary>Export</summary>
+# everything prompt
+ann = prompt_process.everything_prompt()
 
-We support ReID model export to ONNX, OpenVINO, TorchScript and TensorRT
+prompt_process.plot(annotations=ann,output_path='./output/dog.jpg',)
 
-```bash
-# export to ONNX
-$ python3 boxmot/appearance/reid_export.py --include onnx --device cpu
-# export to OpenVINO
-$ python3 boxmot/appearance/reid_export.py --include openvino --device cpu
-# export to TensorRT with dynamic input
-$ python3 boxmot/appearance/reid_export.py --include engine --device 0 --dynamic
+```
+For point/box/text mode prompts, use:
+```
+# bbox default shape [0,0,0,0] -> [x1,y1,x2,y2]
+ann = prompt_process.box_prompt(bboxes=[[200, 200, 300, 300]])
+
+# text prompt
+ann = prompt_process.text_prompt(text='a photo of a dog')
+
+# point prompt
+# points default [[0,0]] [[x1,y1],[x2,y2]]
+# point_label default [0] [1,0] 0:background, 1:foreground
+ann = prompt_process.point_prompt(points=[[620, 360]], pointlabel=[1])
+
+prompt_process.plot(annotations=ann,output_path='./output/dog.jpg',)
+
 ```
 
-The set of hyperparameters leading to the best HOTA result are written to the tracker's config file.
-
-</details>
+You are also welcomed to try our Colab demo: [FastSAM_example.ipynb](https://colab.research.google.com/drive/1oX14f6IneGGw612WgVlAiy91UHwFAvr9?usp=sharing).
 
 
-## Custom tracking examples
 
-<details>
-<summary>Detection</summary>
+## Different Inference Options
 
-```python
-import cv2
-import numpy as np
-from pathlib import Path
+We provide various options for different purposes, details are in [MORE_USAGES.md](MORE_USAGES.md).
 
-from boxmot import DeepOCSORT
+## Training or Validation
+Training from scratch or validation: [Training and Validation Code](https://github.com/CASIA-IVA-Lab/FastSAM/releases).
 
+## Web demo
 
-tracker = DeepOCSORT(
-    model_weights=Path('osnet_x0_25_msmt17.pt'), # which ReID model to use
-    device='cuda:0',
-    fp16=False,
-)
+### Gradio demo
 
-vid = cv2.VideoCapture(0)
+- We also provide a UI for testing our method that is built with gradio. You can upload a custom image, select the mode and set the parameters, click the segment button, and get a satisfactory segmentation result. Currently, the UI supports interaction with the 'Everything mode' and 'points mode'. We plan to add support for additional modes in the future. Running the following command in a terminal will launch the demo:
 
-while True:
-    ret, im = vid.read()
-
-    # substitute by your object detector, output has to be N X (x, y, x, y, conf, cls)
-    dets = np.array([[144, 212, 578, 480, 0.82, 0],
-                    [425, 281, 576, 472, 0.56, 65]])
-
-    # Check if there are any detections
-    if dets.size > 0:
-        tracker.update(dets, im) # --> M X (x, y, x, y, id, conf, cls, ind)
-    # If no detections, make prediction ahead
-    else:   
-        dets = np.empty((0, 6))  # empty N X (x, y, x, y, conf, cls)
-        tracker.update(dets, im) # --> M X (x, y, x, y, id, conf, cls, ind)
-    tracker.plot_results(im, show_trajectories=True)
-
-    # break on pressing q or space
-    cv2.imshow('BoxMOT detection', im)     
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord(' ') or key == ord('q'):
-        break
-
-vid.release()
-cv2.destroyAllWindows()
+```
+# Download the pre-trained model in "./weights/FastSAM.pt"
+python app_gradio.py
 ```
 
-</details>
+- This demo is also hosted on [HuggingFace Space](https://huggingface.co/spaces/An-619/FastSAM).
 
+![HF_Everyhting](assets/hf_everything_mode.png) ![HF_Points](assets/hf_points_mode.png)
 
-<details>
-<summary>Pose & segmentation</summary>
+### Replicate demo
 
-```python
-import cv2
-import numpy as np
-from pathlib import Path
+- [Replicate demo](https://replicate.com/casia-iva-lab/fastsam) has supported all modes, you can experience points/box/text mode.
 
-from boxmot import DeepOCSORT
+![Replicate-1](assets/replicate-1.png) ![Replicate-2](assets/replicate-2.png) ![Replicate-3](assets/replicate-3.png)
 
+## <a name="Models"></a>Model Checkpoints
 
-tracker = DeepOCSORT(
-    model_weights=Path('osnet_x0_25_msmt17.pt'), # which ReID model to use
-    device='cuda:0',
-    fp16=True,
-)
+Two model versions of the model are available with different sizes. Click the links below to download the checkpoint for the corresponding model type.
 
-vid = cv2.VideoCapture(0)
+- **`default` or `FastSAM`: [YOLOv8x based Segment Anything Model](https://drive.google.com/file/d/1m1sjY4ihXBU1fZXdQ-Xdj-mDltW-2Rqv/view?usp=sharing) | [Baidu Cloud (pwd: 0000).](https://pan.baidu.com/s/18KzBmOTENjByoWWR17zdiQ?pwd=0000)**
+- `FastSAM-s`: [YOLOv8s based Segment Anything Model.](https://drive.google.com/file/d/10XmSj6mmpmRb8NhXbtiuO9cTTBwR_9SV/view?usp=sharing)
 
-while True:
-    ret, im = vid.read()
+## Results
 
-    keypoints = np.random.rand(2, 17, 3)
-    mask = np.random.rand(2, 480, 640)
-    # substitute by your object detector, input to tracker has to be N X (x, y, x, y, conf, cls)
-    dets = np.array([[144, 212, 578, 480, 0.82, 0],
-                    [425, 281, 576, 472, 0.56, 65]])
+All result were tested on a single NVIDIA GeForce RTX 3090.
 
-    tracks = tracker.update(dets, im) # --> M x (x, y, x, y, id, conf, cls, ind)
+### 1. Inference time
 
-    # xyxys = tracks[:, 0:4].astype('int') # float64 to int
-    # ids = tracks[:, 4].astype('int') # float64 to int
-    # confs = tracks[:, 5]
-    # clss = tracks[:, 6].astype('int') # float64 to int
-    inds = tracks[:, 7].astype('int') # float64 to int
+Running Speed under Different Point Prompt Numbers(ms).
+| method | params | 1 | 10 | 100 | E(16x16) | E(32x32\*) | E(64x64) |
+|:------------------:|:--------:|:-----:|:-----:|:-----:|:----------:|:-----------:|:----------:|
+| SAM-H | 0.6G | 446 | 464 | 627 | 852 | 2099 | 6972 |
+| SAM-B | 136M | 110 | 125 | 230 | 432 | 1383 | 5417 |
+| FastSAM | 68M | 40 |40 | 40 | 40 | 40 | 40 |
 
-    # in case you have segmentations or poses alongside with your detections you can use
-    # the ind variable in order to identify which track is associated to each seg or pose by:
-    # masks = masks[inds]
-    # keypoints = keypoints[inds]
-    # such that you then can: zip(tracks, masks) or zip(tracks, keypoints)
+### 2. Memory usage
 
-    # break on pressing q or space
-    cv2.imshow('BoxMOT segmentation | pose', im)     
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord(' ') or key == ord('q'):
-        break
+|  Dataset  | Method  | GPU Memory (MB) |
+| :-------: | :-----: | :-------------: |
+| COCO 2017 | FastSAM |      2608       |
+| COCO 2017 |  SAM-H  |      7060       |
+| COCO 2017 |  SAM-B  |      4670       |
 
-vid.release()
-cv2.destroyAllWindows()
-```
+### 3. Zero-shot Transfer Experiments
 
-</details>
+#### Edge Detection
 
-<details>
-<summary>Tiled inference</summary>
-  
-```py
-from sahi import AutoDetectionModel
-from sahi.predict import get_sliced_prediction
-import cv2
-import numpy as np
-from pathlib import Path
-from boxmot import DeepOCSORT
+Test on the BSDB500 dataset.
+|method | year| ODS | OIS | AP | R50 |
+|:----------:|:-------:|:--------:|:--------:|:------:|:-----:|
+| HED | 2015| .788 | .808 | .840 | .923 |
+| SAM | 2023| .768 | .786 | .794 | .928 |
+| FastSAM | 2023| .750 | .790 | .793 | .903 |
 
+#### Object Proposals
 
-tracker = DeepOCSORT(
-    model_weights=Path('osnet_x0_25_msmt17.pt'), # which ReID model to use
-    device='cpu',
-    fp16=False,
-)
+##### COCO
 
-detection_model = AutoDetectionModel.from_pretrained(
-    model_type='yolov8',
-    model_path='yolov8n.pt',
-    confidence_threshold=0.5,
-    device="cpu",  # or 'cuda:0'
-)
+|  method   | AR10 | AR100 | AR1000 | AUC  |
+| :-------: | :--: | :---: | :-----: | :--: |
+| SAM-H E64 | 15.5 | 45.6  |   67.7 | 32.1 |
+| SAM-H E32 | 18.5 | 49.5  |   62.5 | 33.7 |
+| SAM-B E32 | 11.4 | 39.6  |   59.1 | 27.3 |
+|  FastSAM  | 15.7 | 47.3  |   63.7 | 32.2 |
 
-vid = cv2.VideoCapture(0)
-color = (0, 0, 255)  # BGR
-thickness = 2
-fontscale = 0.5
+##### LVIS
 
-while True:
-    ret, im = vid.read()
+bbox AR@1000
+| method | all | small | med. | large |
+|:---------------:|:-----:|:------:|:-----:|:------:|
+| ViTDet-H | 65.0 | 53.2 | 83.3 | 91.2 |
+zero-shot transfer methods
+| SAM-H E64 | 52.1 | 36.6 | 75.1 | 88.2 |
+| SAM-H E32 | 50.3 | 33.1 | 76.2 | 89.8 |
+| SAM-B E32 | 45.0 | 29.3 | 68.7 | 80.6 |
+| FastSAM | 57.1 | 44.3 | 77.1 | 85.3 |
 
-    # get sliced predictions
-    result = get_sliced_prediction(
-        im,
-        detection_model,
-        slice_height=256,
-        slice_width=256,
-        overlap_height_ratio=0.2,
-        overlap_width_ratio=0.2
-    )
-    num_predictions = len(result.object_prediction_list)
-    dets = np.zeros([num_predictions, 6], dtype=np.float32)
-    for ind, object_prediction in enumerate(result.object_prediction_list):
-        dets[ind, :4] = np.array(object_prediction.bbox.to_xyxy(), dtype=np.float32)
-        dets[ind, 4] = object_prediction.score.value
-        dets[ind, 5] = object_prediction.category.id
+#### Instance Segmentation On COCO 2017
 
-    tracks = tracker.update(dets, im) # --> (x, y, x, y, id, conf, cls, ind)
+|  method  |  AP  | APS  | APM  | APL  |
+| :------: | :--: | :--: | :--: | :--: |
+| ViTDet-H | .510 | .320 | .543 | .689 |
+|   SAM    | .465 | .308 | .510 | .617 |
+| FastSAM  | .379 | .239 | .434 | .500 |
 
-    tracker.plot_results(im, show_trajectories=True)
+### 4. Performance Visualization
 
-    # break on pressing q or space
-    cv2.imshow('BoxMOT tiled inference', im)     
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord(' ') or key == ord('q'):
-        break
+Several segmentation results:
 
-vid.release()
-cv2.destroyAllWindows()
-```
+#### Natural Images
 
-</details>
+![Natural Images](assets/eightpic.png)
+
+#### Text to Mask
+
+![Text to Mask](assets/dog_clip.png)
+
+### 5.Downstream tasks
+
+The results of several downstream tasks to show the effectiveness.
+
+#### Anomaly Detection
+
+![Anomaly Detection](assets/anomaly.png)
+
+#### Salient Object Detection
+
+![Salient Object Detection](assets/salient.png)
+
+#### Building Extracting
+
+![Building Detection](assets/building.png)
+
+## License
+
+The model is licensed under the [Apache 2.0 license](LICENSE).
+
+## Acknowledgement
+
+- [Segment Anything](https://segment-anything.com/) provides the SA-1B dataset and the base codes.
+- [YOLOv8](https://github.com/ultralytics/ultralytics) provides codes and pre-trained models.
+- [YOLACT](https://arxiv.org/abs/2112.10003) provides powerful instance segmentation method.
+- [Grounded-Segment-Anything](https://huggingface.co/spaces/yizhangliu/Grounded-Segment-Anything) provides a useful web demo template.
 
 ## Contributors
 
-<a href="https://github.com/mikel-brostrom/yolo_tracking/graphs/contributors ">
-  <img src="https://contrib.rocks/image?repo=mikel-brostrom/yolo_tracking" />
+Our project wouldn't be possible without the contributions of these amazing people! Thank you all for making this project better.
+
+
+<a href="https://github.com/CASIA-IVA-Lab/FastSAM/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=CASIA-IVA-Lab/FastSAM" />
 </a>
 
-## Contact
 
-For Yolo tracking bugs and feature requests please visit [GitHub Issues](https://github.com/mikel-brostrom/yolo_tracking/issues).
-For business inquiries or professional support requests please send an email to: yolov5.deepsort.pytorch@gmail.com
+## Citing FastSAM
+
+If you find this project useful for your research, please consider citing the following BibTeX entry.
+
+```
+@misc{zhao2023fast,
+      title={Fast Segment Anything},
+      author={Xu Zhao and Wenchao Ding and Yongqi An and Yinglong Du and Tao Yu and Min Li and Ming Tang and Jinqiao Wang},
+      year={2023},
+      eprint={2306.12156},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+```
+
+[![Star History Chart](https://api.star-history.com/svg?repos=CASIA-IVA-Lab/FastSAM&type=Date)](https://star-history.com/#CASIA-IVA-Lab/FastSAM&Date)
